@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Voting Results</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
+</head>
+<body>
+  <header>
+    <p>{{ datetime }}</p>
+    <h1>{{ title }}</h1>
+  </header>
+
+  <main>
+    {% for column in columns %}
+      <div class="column">
+        {% for vote in column %}
+          <div class="vote {{ vote.vote }}">
+            <div class="vote-result">{{ vote.vote.upper() }}</div>
+            <div class="vote-label">{{ vote.country }}</div>
+          </div>
+        {% endfor %}
+      </div>
+    {% endfor %}
+  </main>
+
+  <footer>
+    <div class="row">
+      <div class="vote footer yes">
+        <div class="vote-result footer"></div>
+        <div class="vote-label footer">YES</div>
+        <div class="vote-count">{{ counts['yes'] }}</div>
+      </div>
+      <div class="vote footer abst">
+        <div class="vote-result footer"></div>
+        <div class="vote-label footer">ABST</div>
+        <div class="vote-count">{{ counts['abst'] }}</div>
+      </div>
+      <div class="vote footer no">
+        <div class="vote-result footer"></div>
+        <div class="vote-label footer">NO</div>
+        <div class="vote-count">{{ counts['no'] }}</div>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>
