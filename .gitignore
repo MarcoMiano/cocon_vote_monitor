@@ -5,3 +5,6 @@ env/
 *.code-workspace
 
 .vscode/
+
+# Ignore temporary python files
+__pycache__/

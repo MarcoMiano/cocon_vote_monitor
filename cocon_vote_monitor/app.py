@@ -1,11 +1,15 @@
-from flask import Flask, render_template
+from starlette.applications import Starlette
+from starlette.responses import HTMLResponse
+from starlette.routing import Route
+from starlette.templating import Jinja2Templates
+from starlette.requests import Request
+from starlette.staticfiles import StaticFiles
 import json
 
-app = Flask(__name__)
+templates = Jinja2Templates(directory="templates")
 
 
-@app.route("/")
-def index() -> str:
+async def index(request: Request) -> HTMLResponse:
     with open("data/votes.json") as f:
         data = json.load(f)
 
@@ -17,14 +21,19 @@ def index() -> str:
 
     columns = [data["votes"][i : i + 16] for i in range(0, len(data["votes"]), 16)]
 
-    return render_template(
+    return templates.TemplateResponse(
         "index.html",
-        title=data["title"],
-        datetime=data["datetime"],
-        columns=columns,
-        counts=counts,
+        {
+            "request": request,  # required by Starlette templates
+            "title": data["title"],
+            "datetime": data["datetime"],
+            "columns": columns,
+            "counts": counts,
+        },
     )
 
 
-if __name__ == "__main__":
-    app.run(debug=True)
+routes = [Route("/", endpoint=index)]
+
+app = Starlette(debug=True, routes=routes)
+app.mount("/static", StaticFiles(directory="static"), name="static")
