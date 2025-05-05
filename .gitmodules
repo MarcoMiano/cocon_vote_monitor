@@ -1,0 +1,3 @@
+[submodule "external/televic_cocon_client"]
+	path = external/televic_cocon_client
+	url = https://github.com/MarcoMiano/televic_cocon_client.git
