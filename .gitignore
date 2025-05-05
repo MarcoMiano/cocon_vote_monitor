@@ -3,3 +3,5 @@ env/
 
 # Ignore VS code workspace settings
 *.code-workspace
+
+.vscode/
