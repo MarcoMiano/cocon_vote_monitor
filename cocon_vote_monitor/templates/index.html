@@ -1,47 +1,89 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Voting Results</title>
-    <link rel="stylesheet" href="/static/main.css">
-</head>
-<body>
-  <header>
-    <p>{{ datetime }}</p>
-    <h1>{{ title }}</h1>
-  </header>
+  <head>
+    <meta charset="UTF-8">
+    <title>Voting Results</title>
+      <link rel="stylesheet" href="/static/main.css">
+  </head>
+  <body>
+    <header>
+      <p>{{ datetime }}</p>
+      <h1>{{ title }}</h1>
+    </header>
 
-  <main>
-    {% for column in columns %}
-      <div class="column">
-        {% for vote in column %}
-          <div class="vote {{ vote.vote }}">
-            <div class="vote-result">{{ vote.vote.upper() }}</div>
-            <div class="vote-label">{{ vote.country }}</div>
-          </div>
-        {% endfor %}
-      </div>
-    {% endfor %}
-  </main>
+    <!-- JS will fill this -->
+    <main id="votes"></main>
 
-  <footer>
-    <div class="row">
-      <div class="vote footer yes">
-        <div class="vote-result footer"></div>
-        <div class="vote-label footer">YES</div>
-        <div class="vote-count">{{ counts['yes'] }}</div>
+    <footer>
+      <div class="row">
+        <div class="vote footer yes">
+          <div class="vote-result footer"></div>
+          <div class="vote-label  footer">YES</div>
+          <div class="vote-count footer"></div>
+        </div>
+        <div class="vote footer abst">
+          <div class="vote-result footer"></div>
+          <div class="vote-label  footer">ABST</div>
+          <div class="vote-count footer"></div>
+        </div>
+        <div class="vote footer no">
+          <div class="vote-result footer"></div>
+          <div class="vote-label  footer">NO</div>
+          <div class="vote-count footer"></div>
+        </div>
       </div>
-      <div class="vote footer abst">
-        <div class="vote-result footer"></div>
-        <div class="vote-label footer">ABST</div>
-        <div class="vote-count">{{ counts['abst'] }}</div>
-      </div>
-      <div class="vote footer no">
-        <div class="vote-result footer"></div>
-        <div class="vote-label footer">NO</div>
-        <div class="vote-count">{{ counts['no'] }}</div>
-      </div>
-    </div>
-  </footer>
-</body>
+    </footer>
+    <script>
+      const main   = document.getElementById('votes');
+      const yesCnt = document.querySelector('.vote.footer.yes  .vote-count');
+      const abtCnt = document.querySelector('.vote.footer.abst .vote-count');
+      const noCnt  = document.querySelector('.vote.footer.no   .vote-count');
+
+      function buildColumns(columns = []) {
+        const frag = document.createDocumentFragment();
+
+        for (const col of columns) {
+          const colDiv = document.createElement('div');
+          colDiv.className = 'column';
+
+          for (const [delegate, result] of col) {          // ← pair [name, YES/NO/ABST/""]
+            const voteDiv  = document.createElement('div');
+            voteDiv.className = 'vote ' + (result ?? '').toLowerCase();
+
+            const resDiv   = document.createElement('div');
+            resDiv.className = 'vote-result';
+            resDiv.textContent = result;                 // delegate name
+
+            const labDiv   = document.createElement('div');
+            labDiv.className = 'vote-label';
+            labDiv.textContent = delegate || '';             // YES / NO / ABST / ''
+
+            voteDiv.append(resDiv, labDiv);
+            colDiv.appendChild(voteDiv);
+          }
+          frag.appendChild(colDiv);
+        }
+        return frag;
+      }
+
+      async function reloadData() {
+        const data = await fetch('/api/data').then(r => r.json());
+
+        // header
+        document.querySelector('header h1').textContent = data.title     ?? '';
+        document.querySelector('header p' ).textContent = data.datetime  ?? '';
+
+        // vote grid
+        main.replaceChildren(buildColumns(data.columns));
+
+        // footer tallies
+        yesCnt.textContent = data.counts?.YES  ?? 0;
+        abtCnt.textContent = data.counts?.ABST ?? 0;
+        noCnt .textContent = data.counts?.NO   ?? 0;
+      }
+
+      reloadData();                    // initial render
+      setInterval(reloadData, 100);   // poll every 3 s
+    </script>
+  </body>
 </html>
