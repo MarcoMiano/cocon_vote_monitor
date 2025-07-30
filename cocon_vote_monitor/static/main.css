@@ -20,6 +20,25 @@ header {
     align-items: flex-start;
     height: 69px;
     box-sizing: border-box;
+    position: relative;
+}
+
+#print-btn {
+    position: absolute;
+    right: 20px;
+    top: 20px;
+    padding: 5px 10px;
+    font-size: 14px;
+}
+
+@media print {
+    #print-btn {
+        display: none;
+    }
+    body {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
 }
 
 header h1,
@@ -133,4 +152,9 @@ main > .column {
 .abst .vote-result {
     background-color: #ffffff;
     color: #000;
+}
+
+@page {
+    size: A4 landscape;
+    margin: 0;
 }
