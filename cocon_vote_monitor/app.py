@@ -45,6 +45,7 @@ state: Dict[str, object] = {
     "columns": [],  # list[list[tuple[str,str]]]
     "counts": {"YES": 0, "ABST": 0, "NO": 0},
     "show_results": False,
+    "voting_state": "",
 }
 
 # Active websocket connections
@@ -136,6 +137,7 @@ async def cocon_worker() -> None:
                     state["agenda_title"] = agenda_item.Title or "Waiting for vote…"
                     state["show_results"] = False
                 state["show_results"] = result.State == "Stop"
+                state["voting_state"] = result.State
 
             # individual results ──────────────────────────────────────────
             case "IndividualVotingResults":
@@ -233,7 +235,15 @@ async def cocon_worker() -> None:
 
 
 async def homepage(request: Request) -> HTMLResponse:
-    return templates.TemplateResponse("index.html", {"request": request, **state})
+    return templates.TemplateResponse(
+        "index.html", {"request": request, **state, "auto_print": False}
+    )
+
+
+async def auto_homepage(request: Request) -> HTMLResponse:
+    return templates.TemplateResponse(
+        "index.html", {"request": request, **state, "auto_print": True}
+    )
 
 
 async def websocket_endpoint(ws: WebSocket) -> None:
@@ -251,6 +261,7 @@ async def websocket_endpoint(ws: WebSocket) -> None:
 
 routes = [
     Route("/", endpoint=homepage),
+    Route("/autoprint", endpoint=auto_homepage),
     WebSocketRoute("/ws", endpoint=websocket_endpoint),
     Mount("/static", StaticFiles(directory="static"), name="static"),
 ]

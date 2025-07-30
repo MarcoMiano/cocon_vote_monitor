@@ -8,6 +8,8 @@ const footerEl = document.querySelector('footer');
 const yesCnt = document.querySelector('.vote.footer.yes  .vote-count');
 const abtCnt = document.querySelector('.vote.footer.abst .vote-count');
 const noCnt = document.querySelector('.vote.footer.no   .vote-count');
+const autoPrint = document.body.dataset.autoPrint === 'True';
+let printed = false;
 
 function buildColumns(columns = []) {
   const frag = document.createDocumentFragment();
@@ -43,6 +45,13 @@ function update(data) {
   abtCnt.textContent = data.counts?.ABST ?? 0;
   noCnt.textContent = data.counts?.NO ?? 0;
   footerEl.style.display = data.show_results ? 'flex' : 'none';
+  if (autoPrint && data.voting_state === 'Stop' && !printed) {
+    printed = true;
+    window.print();
+  }
+  if (data.voting_state !== 'Stop') {
+    printed = false;
+  }
 }
 
 const ws = new WebSocket(`ws://${location.host}/ws`);
