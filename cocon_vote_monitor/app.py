@@ -7,8 +7,9 @@ from typing import Dict, List, Tuple
 
 from starlette.applications import Starlette
 from starlette.requests import Request
-from starlette.responses import HTMLResponse, JSONResponse
-from starlette.routing import Route, Mount
+from starlette.responses import HTMLResponse
+from starlette.routing import Route, Mount, WebSocketRoute
+from starlette.websockets import WebSocket
 from starlette.staticfiles import StaticFiles
 from starlette.templating import Jinja2Templates
 
@@ -44,6 +45,9 @@ state: Dict[str, object] = {
     "counts": {"YES": 0, "ABST": 0, "NO": 0},
 }
 
+# Active websocket connections
+clients: set[WebSocket] = set()
+
 ###############################################################################
 # ────────────────────────────  HELPERS  ──────────────────────────────────────
 ###############################################################################
@@ -58,6 +62,20 @@ def chunk_votes(votes: Dict[str, str], size: int = 16) -> List[List[Tuple[str, s
 def now_str() -> str:
     now = datetime.now()
     return f"Date {now:%Y-%m-%d} Time {now:%H:%M}"
+
+
+async def broadcast() -> None:
+    """Send the current state to all connected websocket clients."""
+    if not clients:
+        return
+    to_remove: list[WebSocket] = []
+    for ws in clients:
+        try:
+            await ws.send_json(state)
+        except Exception:
+            to_remove.append(ws)
+    for ws in to_remove:
+        clients.discard(ws)
 
 
 ###############################################################################
@@ -144,6 +162,7 @@ async def cocon_worker() -> None:
         if current_vote_id in votes_by_voteid:
             state["columns"] = chunk_votes(votes_by_voteid[current_vote_id])
         state["datetime"] = now_str()
+        await broadcast()
 
     # ───────────  open the CoCon connection  ───────────
     async with CoConClient(
@@ -182,6 +201,7 @@ async def cocon_worker() -> None:
             state["columns"] = chunk_votes(votes_by_voteid[0])
             state["title"] = agenda_item.Title or "Waiting for vote…"
             state["datetime"] = now_str()
+            await broadcast()
         except Exception as exc:  # pragma: no cover
             logger.error("bootstrap failed: %s", exc, exc_info=True)
         # ──────────────────────  END BOOTSTRAP  ────────────────────────
@@ -209,13 +229,22 @@ async def homepage(request: Request) -> HTMLResponse:
     return templates.TemplateResponse("index.html", {"request": request, **state})
 
 
-async def api_data(request: Request) -> JSONResponse:
-    return JSONResponse(state)
+async def websocket_endpoint(ws: WebSocket) -> None:
+    await ws.accept()
+    clients.add(ws)
+    try:
+        await ws.send_json(state)
+        while True:
+            await ws.receive_text()  # keep connection open, ignore messages
+    except Exception:
+        pass
+    finally:
+        clients.discard(ws)
 
 
 routes = [
     Route("/", endpoint=homepage),
-    Route("/api/data", endpoint=api_data),
+    WebSocketRoute("/ws", endpoint=websocket_endpoint),
     Mount("/static", StaticFiles(directory="static"), name="static"),
 ]
 
