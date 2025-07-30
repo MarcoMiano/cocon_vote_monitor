@@ -93,12 +93,12 @@ async def cocon_worker() -> None:
     """
     meeting = Meeting()
     agenda_item = AgendaItem()
-    delegates = Delegates()
+    delegates_in_meeting = Delegates()
     votes_by_voteid: Dict[int, Dict[str, str]] = {}
     current_vote_id = -1
 
     async def handler(data: JSON | str) -> None:
-        nonlocal meeting, agenda_item, delegates, current_vote_id
+        nonlocal meeting, agenda_item, delegates_in_meeting, current_vote_id
         if isinstance(data, str):
             return
 
@@ -119,7 +119,7 @@ async def cocon_worker() -> None:
 
             # delegate list ────────────────────────────────────────────────
             case "Delegates":
-                delegates = result
+                delegates_in_meeting = result
 
             # voting state ─────────────────────────────────────────────────
             case "VotingState":
@@ -127,7 +127,7 @@ async def cocon_worker() -> None:
                     current_vote_id = result.Id
                     votes_by_voteid.setdefault(
                         current_vote_id,
-                        {d.Name: "" for d in delegates.delegates},
+                        {d.Name: "" for d in delegates_in_meeting.delegates},
                     )
                 elif result.State == "Clear":
                     current_vote_id = -1
@@ -144,7 +144,7 @@ async def cocon_worker() -> None:
                 if current_vote_id == -1:
                     return
                 for vr in result.VotingResults:
-                    delegate = delegates.by_id(vr.DelegateId)
+                    delegate = delegates_in_meeting.by_id(vr.DelegateId)
                     if delegate:
                         text = next(
                             (
@@ -186,12 +186,27 @@ async def cocon_worker() -> None:
             meetings = parse_notification(resp.get("GetMeetings", []))
             meeting = meetings.get_active()
 
-            # 2. delegates in that meeting
+            # 2.1. delegates in that meeting
             resp = await client.send(
                 "Delegate/GetDelegatesInMeeting",
                 {"MeetingId": meeting.Id},
             )
-            delegates = parse_notification(resp.get("GetDelegatesInMeeting", []))
+            delegates_in_meeting: Delegates = parse_notification(
+                resp.get("GetDelegatesInMeeting", [])
+            )
+            # 2.2. all delegates
+            resp = await client.send("Delegate/GetAllDelegates")
+            delegates: Delegates = parse_notification(resp.get("GetAllDelegates", []))
+
+            # 2.3 add voting rights value in delegates_in_meeting objects
+            for i in range(len(delegates_in_meeting.delegates)):
+                delegate_id = delegates_in_meeting.delegates[i].Id
+                for d in delegates.delegates:
+                    if d.Id == delegate_id:
+                        delegates_in_meeting.delegates[i].VotingRight = d.VotingRight
+
+            # 2.4. filter delegates_in_meeting to only who have voting rights
+            delegates_in_meeting = delegates_in_meeting.filter_by_voting_right()
 
             # 3. active agenda item
             resp = await client.send(
@@ -203,7 +218,7 @@ async def cocon_worker() -> None:
             agenda_item = agenda.get_active()
 
             # initialise state so tiles appear immediately
-            votes_by_voteid[0] = {d.Name: "" for d in delegates.delegates}
+            votes_by_voteid[0] = {d.Name: "" for d in delegates_in_meeting.delegates}
             state["columns"] = chunk_votes(votes_by_voteid[0])
             state["meeting_title"] = meeting.Title or ""
             state["agenda_title"] = agenda_item.Title or "Waiting for vote…"
