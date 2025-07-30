@@ -109,8 +109,6 @@ async def cocon_worker() -> None:
             case "MeetingStatus":
                 if result.State == "Ended":
                     state["agenda_title"] = "Meeting ended"
-                else:
-                    state["meeting_title"] = result.Name or ""
 
             # active agenda item ───────────────────────────────────────────
             case "AgendaItem":
@@ -205,7 +203,7 @@ async def cocon_worker() -> None:
             # initialise state so tiles appear immediately
             votes_by_voteid[0] = {d.Name: "" for d in delegates.delegates}
             state["columns"] = chunk_votes(votes_by_voteid[0])
-            state["meeting_title"] = meeting.Name or ""
+            state["meeting_title"] = meeting.Title or ""
             state["agenda_title"] = agenda_item.Title or "Waiting for vote…"
             state["datetime"] = now_str()
             state["show_results"] = False
