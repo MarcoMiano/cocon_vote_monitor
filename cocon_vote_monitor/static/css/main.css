@@ -16,15 +16,27 @@ header, footer {
 
 header {
     display: flex;
-    flex-direction: column;
+    justify-content: space-between;
     align-items: flex-start;
     height: 69px;
     box-sizing: border-box;
+    position: relative;
+}
+
+@media print {
+    #print-btn {
+        display: none;
+    }
+    body {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+        zoom: 60%;
+    }
 }
 
 header h1,
 header h2 {
-    margin: -26px 0 0 20px;
+    margin: 0 0 0 20px;
     font-size: 30px;
     text-align: left;
 }
@@ -34,7 +46,8 @@ header h2 {
     font-size: 26px;
 }
 
-header p {
+header p,
+header button {
     margin: 5px 20px 0 0;
     font-size: 20px;
     align-self: flex-end;
@@ -73,6 +86,20 @@ main > .column {
     flex: 1;
 }
 
+.header-left,
+.header-right {
+    display: flex;
+    flex-direction: column;
+}
+
+.header-left {
+    align-items: flex-start;
+}
+
+.header-right {
+    align-items: flex-end;
+}
+
 .vote {
     display: flex;
     width: 100%;
@@ -88,7 +115,7 @@ main > .column {
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #fff;
+    color: #000;
 }
 
 .vote-result.footer {
@@ -132,5 +159,22 @@ main > .column {
 
 .abst .vote-result {
     background-color: #ffffff;
-    color: #000;
+}
+
+.icon-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+}
+
+.icon-button img {
+    width: 24px;
+    height: 24px;
+    filter: invert(1)
+}
+
+@page {
+    size: A4;
+    margin: 10mm;
 }
