@@ -3,7 +3,8 @@ name: cocon_vote_monitor
 channels:
   - defaults
 dependencies:
-  - python=3.11
+  - python=3.13
+  - aiohttp
   - pip
   - pip:
       - uvicorn[standard]
