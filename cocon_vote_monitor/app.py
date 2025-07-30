@@ -214,6 +214,7 @@ async def cocon_worker() -> None:
                 Model.TIMER,
                 Model.AUDIO,
                 Model.LOGGING,
+                Model.INTERPRETATION,
             ]
         )
         # sleep forever – cancellation will break us out
