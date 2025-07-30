@@ -39,10 +39,12 @@ templates = Jinja2Templates(directory="templates")
 # This dict is mutated only by the background worker and read by request-handlers.
 
 state: Dict[str, object] = {
-    "title": "Waiting for meeting…",
+    "meeting_title": "",
+    "agenda_title": "Waiting for meeting…",
     "datetime": "",
     "columns": [],  # list[list[tuple[str,str]]]
     "counts": {"YES": 0, "ABST": 0, "NO": 0},
+    "show_results": False,
 }
 
 # Active websocket connections
@@ -106,13 +108,13 @@ async def cocon_worker() -> None:
             # meeting state ────────────────────────────────────────────────
             case "MeetingStatus":
                 if result.State == "Ended":
-                    state["title"] = "Meeting ended"
+                    state["agenda_title"] = "Meeting ended"
 
             # active agenda item ───────────────────────────────────────────
             case "AgendaItem":
                 if result.State == "active":
                     agenda_item = result
-                    state["title"] = agenda_item.Title
+                    state["agenda_title"] = agenda_item.Title
 
             # delegate list ────────────────────────────────────────────────
             case "Delegates":
@@ -131,7 +133,9 @@ async def cocon_worker() -> None:
                     votes_by_voteid.clear()  # throw away old vote maps
                     state["columns"] = []  # remove country tiles
                     state["counts"] = {"YES": 0, "ABST": 0, "NO": 0}  # zero the footer
-                    state["title"] = agenda_item.Title or "Waiting for vote…"
+                    state["agenda_title"] = agenda_item.Title or "Waiting for vote…"
+                    state["show_results"] = False
+                state["show_results"] = result.State == "Stop"
 
             # individual results ──────────────────────────────────────────
             case "IndividualVotingResults":
@@ -199,8 +203,10 @@ async def cocon_worker() -> None:
             # initialise state so tiles appear immediately
             votes_by_voteid[0] = {d.Name: "" for d in delegates.delegates}
             state["columns"] = chunk_votes(votes_by_voteid[0])
-            state["title"] = agenda_item.Title or "Waiting for vote…"
+            state["meeting_title"] = meeting.Title or ""
+            state["agenda_title"] = agenda_item.Title or "Waiting for vote…"
             state["datetime"] = now_str()
+            state["show_results"] = False
             await broadcast()
         except Exception as exc:  # pragma: no cover
             logger.error("bootstrap failed: %s", exc, exc_info=True)
