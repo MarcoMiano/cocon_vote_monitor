@@ -66,24 +66,17 @@
         return frag;
       }
 
-      async function reloadData() {
-        const data = await fetch('/api/data').then(r => r.json());
-
-        // header
-        document.querySelector('header h1').textContent = data.title     ?? '';
-        document.querySelector('header p' ).textContent = data.datetime  ?? '';
-
-        // vote grid
+      function update(data) {
+        document.querySelector('header h1').textContent = data.title ?? '';
+        document.querySelector('header p').textContent = data.datetime ?? '';
         main.replaceChildren(buildColumns(data.columns));
-
-        // footer tallies
-        yesCnt.textContent = data.counts?.YES  ?? 0;
+        yesCnt.textContent = data.counts?.YES ?? 0;
         abtCnt.textContent = data.counts?.ABST ?? 0;
-        noCnt .textContent = data.counts?.NO   ?? 0;
+        noCnt.textContent  = data.counts?.NO ?? 0;
       }
 
-      reloadData();                    // initial render
-      setInterval(reloadData, 100);   // poll every 3 s
+      const ws = new WebSocket(`ws://${location.host}/ws`);
+      ws.onmessage = evt => update(JSON.parse(evt.data));
     </script>
   </body>
 </html>
