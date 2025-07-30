@@ -38,6 +38,7 @@ header {
     body {
         -webkit-print-color-adjust: exact;
         print-color-adjust: exact;
+        zoom: 55%;
     }
 }
 
@@ -155,6 +156,6 @@ main > .column {
 }
 
 @page {
-    size: A4 landscape;
-    margin: 0;
+    size: A4;
+    margin: 10mm;
 }
