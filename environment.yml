@@ -1,1 +1,11 @@
 # Environment file to create a conda environment for the project
+name: cocon_vote_monitor
+channels:
+  - defaults
+dependencies:
+  - python=3.11
+  - pip
+  - pip:
+      - uvicorn[standard]
+      - starlette
+      - jinja2
