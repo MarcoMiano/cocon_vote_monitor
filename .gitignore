@@ -1,3 +1,9 @@
+# CoCon Vote Monitor
+# .gitignore
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Copyright (C) 3P Technologies Srl
+# Author: Marco Miano
+
 # Ignore virtual environment
 env/
 

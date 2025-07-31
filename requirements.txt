@@ -1,3 +1,9 @@
+# CoCon Vote Monitor
+# requirements.txt
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Copyright (C) 3P Technologies Srl
+# Author: Marco Miano
+
 # file used by pip to install dependencies
 uvicorn[standard]
 starlette
