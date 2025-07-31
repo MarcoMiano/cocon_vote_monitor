@@ -177,7 +177,6 @@ async def cocon_worker() -> None:
         # ─────────────────────────  BOOTSTRAP ONCE  ────────────────────
         await asyncio.sleep(1)
         try:
-            print("!!!!!!!!!!!!BOOTSTRAP!!!!!!!!!!!!!!")
             # 1. current meeting today
             resp = await client.send("Meeting_Agenda/GetMeetingsForToday")
             meetings = parse_notification(resp.get("GetMeetings", []))
@@ -214,9 +213,7 @@ async def cocon_worker() -> None:
             )
             agenda_item = agenda.get_active()
 
-            # initialise state so tiles appear immediately
-            votes_by_voteid[0] = {d.Name: "" for d in delegates_in_meeting.delegates}
-            state["columns"] = chunk_votes(votes_by_voteid[0])
+            # initialise states
             state["meeting_title"] = meeting.Title or ""
             state["agenda_title"] = agenda_item.Title or "Waiting for vote…"
             state["datetime"] = now_str()
