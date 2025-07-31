@@ -244,11 +244,11 @@ async def cocon_worker() -> None:
 
 
 async def homepage(request: Request) -> FileResponse:
-    return FileResponse("templates/index.html")
+    return FileResponse("cocon_vote_monitor/templates/index.html")
 
 
 async def auto_homepage(request: Request) -> FileResponse:
-    return FileResponse("templates/index.html")
+    return FileResponse("cocon_vote_monitor/templates/index.html")
 
 
 async def websocket_endpoint(ws: WebSocket) -> None:
@@ -268,7 +268,7 @@ routes = [
     Route("/", endpoint=homepage),
     Route("/autoprint", endpoint=auto_homepage),
     WebSocketRoute("/ws", endpoint=websocket_endpoint),
-    Mount("/static", StaticFiles(directory="static"), name="static"),
+    Mount("/static", StaticFiles(directory="cocon_vote_monitor/static"), name="static"),
 ]
 
 ###############################################################################
