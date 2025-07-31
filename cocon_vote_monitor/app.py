@@ -2,16 +2,15 @@
 import asyncio
 from contextlib import suppress
 from datetime import datetime
-from pprint import pprint
 from typing import Dict, List, Tuple
 
 from starlette.applications import Starlette
 from starlette.requests import Request
-from starlette.responses import HTMLResponse
+from starlette.responses import FileResponse
 from starlette.routing import Route, Mount, WebSocketRoute
 from starlette.websockets import WebSocket
 from starlette.staticfiles import StaticFiles
-from starlette.templating import Jinja2Templates
+
 
 from cocon_client import (
     CoConClient,
@@ -31,7 +30,6 @@ from cocon_client import (
 COCON_HOST = "10.17.12.231"
 COCON_PORT = 8890
 
-templates = Jinja2Templates(directory="templates")
 
 ###############################################################################
 # ───────────────────────────  SHARED STATE  ─────────────────────────────────-
@@ -103,7 +101,6 @@ async def cocon_worker() -> None:
             return
 
         result = parse_notification(data)
-        pprint(result)
 
         match result.__class__.__name__:
             # meeting state ────────────────────────────────────────────────
@@ -249,16 +246,12 @@ async def cocon_worker() -> None:
 ###############################################################################
 
 
-async def homepage(request: Request) -> HTMLResponse:
-    return templates.TemplateResponse(
-        "index.html", {"request": request, **state, "auto_print": False}
-    )
+async def homepage(request: Request) -> FileResponse:
+    return FileResponse("templates/index.html")
 
 
-async def auto_homepage(request: Request) -> HTMLResponse:
-    return templates.TemplateResponse(
-        "index.html", {"request": request, **state, "auto_print": True}
-    )
+async def auto_homepage(request: Request) -> FileResponse:
+    return FileResponse("templates/index.html")
 
 
 async def websocket_endpoint(ws: WebSocket) -> None:

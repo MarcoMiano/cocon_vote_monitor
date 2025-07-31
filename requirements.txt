@@ -1,4 +1,3 @@
 # file used by pip to install dependencies
 uvicorn[standard]
 starlette
-jinja2

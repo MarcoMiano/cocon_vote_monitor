@@ -9,4 +9,3 @@ dependencies:
   - pip:
       - uvicorn[standard]
       - starlette
-      - jinja2

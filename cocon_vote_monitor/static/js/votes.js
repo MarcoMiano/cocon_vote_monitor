@@ -8,7 +8,7 @@ const footerEl = document.querySelector('footer');
 const yesCnt = document.querySelector('.vote.footer.yes  .vote-count');
 const abtCnt = document.querySelector('.vote.footer.abst .vote-count');
 const noCnt = document.querySelector('.vote.footer.no   .vote-count');
-const autoPrint = document.body.dataset.autoPrint === 'True';
+const autoPrint = window.location.pathname.startsWith('/autoprint');
 let printed = false;
 
 function buildColumns(columns = []) {
