@@ -54,17 +54,21 @@ clients: set[WebSocket] = set()
 ###############################################################################
 
 
+# Split a mapping like {'Italy': 'YES'} into smaller lists that the
+# HTML templates can easily render.
 def chunk_votes(votes: Dict[str, str], size: int = 16) -> List[List[Tuple[str, str]]]:
-    """Split {'Italy':'YES', …} into chunks for the template."""
     items = list(votes.items())
     return [items[i : i + size] for i in range(0, len(items), size)]
 
 
+# Format the current time the same way CoCon does in its GUI.
 def now_str() -> str:
     now = datetime.now()
     return f"Date {now:%Y-%m-%d} Time {now:%H:%M}"
 
 
+# Send the current state to every connected websocket.  Any client that fails
+# to receive the message is dropped from the list.
 async def broadcast() -> None:
     """Send the current state to all connected websocket clients."""
     if not clients:
@@ -84,6 +88,9 @@ async def broadcast() -> None:
 ###############################################################################
 
 
+# Background task that keeps a connection to CoCon alive.  It receives
+# notifications and updates the shared `state` dictionary accordingly.  The
+# coroutine runs until cancelled.
 async def cocon_worker() -> None:
     """
     Connect to CoCon once, stay subscribed, and update `state` in-place.
@@ -95,6 +102,8 @@ async def cocon_worker() -> None:
     votes_by_voteid: Dict[int, Dict[str, str]] = {}
     current_vote_id = -1
 
+    # Callback invoked for every notification from CoCon.  It parses the
+    # message and updates the shared state based on its type.
     async def handler(data: JSON | str) -> None:
         nonlocal meeting, agenda_item, delegates_in_meeting, current_vote_id
         if isinstance(data, str):
@@ -243,10 +252,13 @@ async def cocon_worker() -> None:
 ###############################################################################
 
 
+# Serve the main page.
 async def homepage(request: Request) -> FileResponse:
     return FileResponse("cocon_vote_monitor/templates/index.html")
 
 
+# Handle a websocket connection from the browser.  Once connected we send the
+# current state and then keep the connection alive until the client goes away.
 async def websocket_endpoint(ws: WebSocket) -> None:
     await ws.accept()
     clients.add(ws)
@@ -274,12 +286,16 @@ routes = [
 app = Starlette(debug=True, routes=routes)
 
 
+# When the web application starts we launch the background worker and remember
+# the task so it can be stopped again later.
 @app.on_event("startup")
 async def _start_worker() -> None:
     # store the task on app.state so we can cancel it later
     app.state.cocon_task = asyncio.create_task(cocon_worker(), name="cocon-worker")
 
 
+# On shutdown we cancel the background worker and wait for it to finish
+# cleanly.
 @app.on_event("shutdown")
 async def _stop_worker() -> None:
     task: asyncio.Task | None = getattr(app.state, "cocon_task", None)
