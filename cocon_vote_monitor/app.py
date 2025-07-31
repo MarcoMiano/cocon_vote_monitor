@@ -247,10 +247,6 @@ async def homepage(request: Request) -> FileResponse:
     return FileResponse("cocon_vote_monitor/templates/index.html")
 
 
-async def auto_homepage(request: Request) -> FileResponse:
-    return FileResponse("cocon_vote_monitor/templates/index.html")
-
-
 async def websocket_endpoint(ws: WebSocket) -> None:
     await ws.accept()
     clients.add(ws)
@@ -266,7 +262,7 @@ async def websocket_endpoint(ws: WebSocket) -> None:
 
 routes = [
     Route("/", endpoint=homepage),
-    Route("/autoprint", endpoint=auto_homepage),
+    Route("/noautoprint", endpoint=homepage),
     WebSocketRoute("/ws", endpoint=websocket_endpoint),
     Mount("/static", StaticFiles(directory="cocon_vote_monitor/static"), name="static"),
 ]
