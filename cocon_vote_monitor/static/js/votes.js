@@ -1,3 +1,9 @@
+// CoCon Vote Monitor
+// votes.js
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Copyright (C) 3P Technologies Srl
+// Author: Marco Miano
+
 'use strict';
 
 const main = document.getElementById('votes');
