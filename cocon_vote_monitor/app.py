@@ -1,4 +1,8 @@
+# CoCon Vote Monitor
 # app.py
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Copyright (C) 3P Technologies Srl
+# Author: Marco Miano
 import asyncio
 from contextlib import suppress
 from datetime import datetime

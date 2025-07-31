@@ -1,3 +1,9 @@
+# CoCon Vote Monitor
+# .gitmodules
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Copyright (C) 3P Technologies Srl
+# Author: Marco Miano
+
 [submodule "external/cocon_client"]
 	path = external/cocon_client
 	url = https://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@github.com/MarcoMiano/televic_cocon_client.git
