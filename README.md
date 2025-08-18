@@ -1,13 +1,15 @@
 # CoCon Vote Monitor
 
-A minimal web interface that displays live voting results from a [Televic CoCon](https://www.televic-conference.com/) system. The application is built with [Starlette](https://www.starlette.io/) and communicates with CoCon through the accompanying `cocon_client` library.
+A minimal web interface that displays live voting results from a [Televic CoCon](https://www.televic-conference.com/) system. The application is built with [Starlette](https://www.starlette.io/) and communicates with CoCon through the accompanying [`cocon_client`](https://github.com/3PTechnologies/cocon_client) library.
+
+This project is built around the `cocon_client` module. For more information about the client itself see the [cocon_client repository](https://github.com/3PTechnologies/cocon_client).
 
 ## Clone the repository
 
-Clone this repository including submodules so that the `cocon_client` dependency is fetched as well:
+Clone this repository:
 
 ```bash
-git clone --recurse-submodules <repo-url>
+git clone <repo-url>
 cd cocon_vote_monitor
 ```
 
