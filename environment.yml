@@ -15,3 +15,4 @@ dependencies:
   - pip:
       - uvicorn[standard]
       - starlette
+      - cocon_client
