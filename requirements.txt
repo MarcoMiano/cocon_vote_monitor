@@ -5,6 +5,7 @@
 # Author: Marco Miano
 
 # file used by pip to install dependencies
+aiohttp
 uvicorn[standard]
 starlette
 cocon_client
