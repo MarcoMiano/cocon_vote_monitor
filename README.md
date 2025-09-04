@@ -13,7 +13,7 @@ git clone <repo-url>
 cd cocon_vote_monitor
 ```
 
-## Setting up a Python environment
+## Installation
 
 Create a Python environment using either Conda or a virtual environment.
 
@@ -30,6 +30,23 @@ conda activate cocon_vote_monitor
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
+```
+
+### Option 3: virtualenv + offline pip
+
+On a machine with Internet access:
+
+```bash
+mkdir packages
+pip download -r requirements.txt -d packages
+```
+
+Transfer the `packages` directory to the offline machine, then install:
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+pip install --no-index --find-links packages -r requirements.txt
 ```
 
 ## Running the application
