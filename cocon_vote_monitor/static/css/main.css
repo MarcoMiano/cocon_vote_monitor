@@ -40,6 +40,9 @@ header {
         print-color-adjust: exact;
         zoom: 60%;
     }
+    .vote {
+        height: 90px;
+    }
 }
 
 header h1,
