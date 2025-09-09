@@ -29,11 +29,11 @@ function buildColumns(columns = []) {
 
       const resDiv = document.createElement('div');
       resDiv.className = 'vote-result';
-      resDiv.textContent = result; // delegate name
+      resDiv.textContent = result; // YES / NO / ABST / ''
 
       const labDiv = document.createElement('div');
       labDiv.className = 'vote-label';
-      labDiv.textContent = delegate || ''; // YES / NO / ABST / ''
+      labDiv.textContent = delegate || ''; // delegate name
 
       voteDiv.append(resDiv, labDiv);
       colDiv.appendChild(voteDiv);
