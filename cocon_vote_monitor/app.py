@@ -27,7 +27,7 @@ from cocon_client import (
     logger,
 )
 
-from .config import COCON_HOST, COCON_PORT, COLUMN_LINES
+from .config import COCON_HOST, COCON_PORT, COLUMN_LINES, ROOM_NAME
 
 
 ###############################################################################
@@ -36,6 +36,7 @@ from .config import COCON_HOST, COCON_PORT, COLUMN_LINES
 # This dict is mutated only by the background worker and read by request-handlers.
 
 state: Dict[str, object] = {
+    "title": f"Voting Results {' - ' + ROOM_NAME if ROOM_NAME else ''}",
     "meeting_title": "",
     "agenda_title": "Waiting for meeting…",
     "datetime": "",

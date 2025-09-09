@@ -44,6 +44,7 @@ function buildColumns(columns = []) {
 }
 
 function update(data) {
+  document.title = data.title
   meetingEl.textContent = data.meeting_title ?? '';
   agendaEl.textContent = data.agenda_title ?? '';
   dateEl.textContent = data.datetime ?? '';
