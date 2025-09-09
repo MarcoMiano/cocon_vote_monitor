@@ -27,12 +27,7 @@ from cocon_client import (
     logger,
 )
 
-###############################################################################
-# ─────────────────────────────  CONFIG  ──────────────────────────────────────
-###############################################################################
-
-COCON_HOST = "10.17.12.231"
-COCON_PORT = 8890
+from .config import COCON_HOST, COCON_PORT, COLUMN_LINES
 
 
 ###############################################################################
@@ -58,10 +53,12 @@ clients: set[WebSocket] = set()
 ###############################################################################
 
 
-# Split a mapping like {'Italy': 'YES'} into smaller lists that the
+# Sort a mapping like {'Italy': 'YES'} and split it into smaller lists that the
 # HTML templates can easily render.
-def chunk_votes(votes: Dict[str, str], size: int = 16) -> List[List[Tuple[str, str]]]:
-    items = list(votes.items())
+def sort_and_chunk_votes(
+    votes: Dict[str, str], size: int = 16
+) -> List[List[Tuple[str, str]]]:
+    items = sorted(votes.items())
     return [items[i : i + size] for i in range(0, len(items), size)]
 
 
@@ -176,7 +173,9 @@ async def cocon_worker() -> None:
 
         # refresh public snapshot whenever anything interesting happened
         if current_vote_id in votes_by_voteid:
-            state["columns"] = chunk_votes(votes_by_voteid[current_vote_id])
+            state["columns"] = sort_and_chunk_votes(
+                votes_by_voteid[current_vote_id], COLUMN_LINES
+            )
         state["datetime"] = now_str()
         await broadcast()
 
