@@ -14,3 +14,6 @@ env/
 
 # Ignore temporary python files
 __pycache__/
+
+# Ignore data folder. It is used only for testing
+data/
