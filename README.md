@@ -107,7 +107,7 @@ You may want to run the above command under a process manager such as `systemd` 
 
 ## Configuration
 
-The CoCon host and port can be adjusted in [`cocon_vote_monitor/app.py`](cocon_vote_monitor/app.py) via the `COCON_HOST` and `COCON_PORT` constants.
+The CoCon host, port and the number of delegate entries per column can be adjusted in [`cocon_vote_monitor/config.py`](cocon_vote_monitor/app.py) via the `COCON_HOST`, `COCON_PORT` and `COLUMN_LINES` constants.
 
 ## License
 
