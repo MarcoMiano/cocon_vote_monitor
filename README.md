@@ -17,7 +17,7 @@ cd cocon_vote_monitor
 
 Create a Python environment using either Conda or a virtual environment.
 
-### Option 1: Conda
+### Option 1: conda
 
 ```bash
 conda env create -f environment.yml
@@ -32,7 +32,41 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-### Option 3: virtualenv + offline pip
+### Option 3.1: OFFLINE - conda
+Conda is not required to be installed in the offline machine.
+
+On a machine with internet access:
+```bash
+# 1. Create the env
+conda env create -f environment.yml
+conda activate cocon_vote_monitor
+
+# 1.1. OPTIONAL -  make sure pip is up to date
+python -m pip install -U pip
+
+# 2. Install conda-pack (one time per system)
+conda install -n base -c conda-forge conda-pack
+
+# 3. Pack the full environment
+conda-pack -n cocon_vote_monitor -o cocon_vote_monitor.tar.gz
+```
+Move the *tar.gz to the offline machine (USB stick, SCP, TFTP, whatever)
+
+On the offline machine:
+```bash
+# 4. Create the env folder and unpack
+mkdir -p ~/envs/cocon_vote_monitor
+tar -xzf cocon_vote_monitor.tar.gz -C ~/envs/cocon_vote_monitor
+
+# 5. Fix prefixes/paths
+~/envs/cocon_vote_monitor/bin/conda-unpack
+
+# 6. Activate the new enviroment
+source ~/envs/cocon_vote_monitor/bin/activate
+```
+
+
+### Option 3.2: OFFLINE - virtualenv + offline pip
 
 On a machine with Internet access:
 
@@ -77,8 +111,7 @@ The CoCon host and port can be adjusted in [`cocon_vote_monitor/app.py`](cocon_v
 
 ## License
 
-This project is licensed under the [GNU Affero General Public License
-v3.0 or later](https://www.gnu.org/licenses/agpl-3.0-standalone.html).
+This project is licensed under the [GNU Affero General Public License v3.0 or later](https://www.gnu.org/licenses/agpl-3.0-standalone.html).
 
 ## Manteiners
 Developed and maintained by **3P Technologies Srl**.
