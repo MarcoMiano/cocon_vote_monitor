@@ -46,7 +46,8 @@ jobs:
               mkdir -p "${STAGE}/src"
 
               # Create env tarball
-              micromamba run -n base conda-pack -n cocon_vote_monitor -o env.tar.gz
+              micromamba run -n base conda-pack -p "${MAMBA_ROOT_PREFIX}/envs/cocon_vote_monitor" /
+                                                -o env.tar.gz
 
               # Stage files
               mv env.tar.gz "$STAGE/"
