@@ -46,7 +46,7 @@ jobs:
               mkdir -p "${STAGE}/src"
 
               # Create env tarball
-              micromamba run -n base conda-pack -n app -o env.tar.gz
+              micromamba run -n base conda-pack -n cocon_vote_monitor -o env.tar.gz
 
               # Stage files
               mv env.tar.gz "$STAGE/"
@@ -54,10 +54,10 @@ jobs:
               rsync -a --exclude '.git' --exclude '.github' \
                        --exclude '__pycache__' --exclude '*.pyc' \
                        --exclude 'env' --exclude '*.tar.gz' \
-                       "$GITHUB_WORKSPACE"/ "$STAGE/src/"
+                       "${GITHUB_WORKSPACE}"/ "${STAGE}/src/"
               
               # Minimal INSTALL
-              cat > "$STAGE/INSTALL.md" <<'EOF'
+              cat > "${STAGE}/INSTALL.md" <<'EOF'
               # Quick start
               tar -xzf env.tar.gz -C .
               ./env/bin/conda-unpack
@@ -66,9 +66,9 @@ jobs:
               ../app_env/bin/python -m cocon_vote_monitor --help
               EOF
 
-              tar -C "$STAGING_ROOT" -czf "${BASENAME}.tar.gz" "${BASENAME}"
-              mv "${BASENAME}.tar.gz" "GITHUB_WORKSPACE/"
-              echo "archive=${BASENAME}.tar.gz" >> "$GITHUB_OUTPUT"
+              tar -C "${STAGING_ROOT}" -czf "${BASENAME}.tar.gz" "${BASENAME}"
+              mv "${BASENAME}.tar.gz" "${GITHUB_WORKSPACE}/"
+              echo "archive=${BASENAME}.tar.gz" >> "${GITHUB_OUTPUT}"
           
           - name: Publish release
             uses: softprops/action-gh-release@v2
