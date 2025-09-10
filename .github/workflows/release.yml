@@ -44,7 +44,7 @@ jobs:
               mkdir -p "$STAGE"
 
               # Create env tarball
-              conda-pack -n app -o env.tar.gz
+              micromamba run -n base conda-pack -n app -o env.tar.gz
 
               # Stage files
               mv env.tar.gz "$STAGE/"
@@ -69,7 +69,7 @@ jobs:
           - name: Publish release
             uses: softprops/action-gh-release@v2
             with:
-                tag_name: ${{ github.ref_name }}
+                tag_name: ${{ github.event.inputs.version || github.ref_name }}
                 name: ${{ github.ref_name }}
                 files: ${{ steps.pack.outputs.archive }}
             env:
