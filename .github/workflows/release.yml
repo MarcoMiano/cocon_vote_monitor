@@ -60,11 +60,12 @@ jobs:
               # Minimal INSTALL
               cat > "${STAGE}/INSTALL.md" <<'EOF'
               # Quick start
-              tar -xzf env.tar.gz -C .
+              mkdir ./env
+              tar -xzf env.tar.gz -C ./env
               ./env/bin/conda-unpack
               cd src
               # Edit ./src/cocon_vote_monitor/config.py or other files and run.
-              ../app_env/bin/python -m cocon_vote_monitor --help
+              ../app_env/bin/python -m evicorn cocon_vote_monitor.app:app --reload
               EOF
 
               tar -C "${STAGING_ROOT}" -czf "${BASENAME}.tar.gz" "${BASENAME}"
