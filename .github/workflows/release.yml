@@ -32,44 +32,50 @@ jobs:
                     -n cocon_vote_monitor
           
           - name: Install conda-pack
-            shell: bash -l
-            run: micromambe install -y -n base conda-pack
+            shell: bash -l {0}
+            run: micromamba install -y -n base conda-pack
         
           - name: Pack environment
             id: pack
             shell: bash -l {0}
             run: |
-              PATFORM="$(uname -s | tr '[:upper:]' '[:lower:]')-$(uname -m)"
-              STAGE="cocon_vote_monitor${VERSION}_{$PLATFORM}"
-              mkdir -p "$STAGE"
+              PLATFORM="$(uname -s | tr '[:upper:]' '[:lower:]')-$(uname -m)"
+              BASENAME="cocon_vote_monitor_${VERSION}_${PLATFORM}"
+              STAGING_ROOT="$(mktemp -d)"
+              STAGE="${STAGING_ROOT}/${BASENAME}"
+              mkdir -p "${STAGE}/src"
 
               # Create env tarball
-              conda-pack -n app -o env.tar.gz
+              micromamba run -n base conda-pack -p "${MAMBA_ROOT_PREFIX}/envs/cocon_vote_monitor" \
+                                                -o env.tar.gz
 
               # Stage files
               mv env.tar.gz "$STAGE/"
               # include your source tree
-              rsync -a --exclude '.git' --exclude '.github' / "$STAGE/src/" \
-                    --exclude 'env' --exclude '__pycache__' --exclude '*.pyc'
+              rsync -a --exclude '.git' --exclude '.github' \
+                       --exclude '__pycache__' --exclude '*.pyc' \
+                       --exclude 'env' --exclude '*.tar.gz' \
+                       "${GITHUB_WORKSPACE}"/ "${STAGE}/src/"
               
               # Minimal INSTALL
-              cat > "$STAGE/INSTALL.md" <<'EOF'
+              cat > "${STAGE}/INSTALL.md" <<'EOF'
               # Quick start
-              tar -xzf env.tar.gz -C .
+              mkdir ./env
+              tar -xzf env.tar.gz -C ./env
               ./env/bin/conda-unpack
               cd src
               # Edit ./src/cocon_vote_monitor/config.py or other files and run.
-              ../app_env/bin/python -m cocon_vote_monitor --help
+              ../app_env/bin/python -m evicorn cocon_vote_monitor.app:app --reload
               EOF
 
-              TAR="${STAGE}.tar.gz"
-              tar -czf "$TAR" "$STAGE"
-              echo "archive=$TAR" >> "$GITHUB_OUTPUT"
+              tar -C "${STAGING_ROOT}" -czf "${BASENAME}.tar.gz" "${BASENAME}"
+              mv "${BASENAME}.tar.gz" "${GITHUB_WORKSPACE}/"
+              echo "archive=${BASENAME}.tar.gz" >> "${GITHUB_OUTPUT}"
           
           - name: Publish release
             uses: softprops/action-gh-release@v2
             with:
-                tag_name: ${{ github.ref_name }}
+                tag_name: ${{ github.event.inputs.version || github.ref_name }}
                 name: ${{ github.ref_name }}
                 files: ${{ steps.pack.outputs.archive }}
             env:
