@@ -39,11 +39,11 @@ jobs:
             id: pack
             shell: bash -l {0}
             run: |
-              PATFORM="$(uname -s | tr '[:upper:]' '[:lower:]')-$(uname -m)"
-              BASENAME="cocon_vote_monitor_${VERSION}_{$PLATFORM}"
+              PLATFORM="$(uname -s | tr '[:upper:]' '[:lower:]')-$(uname -m)"
+              BASENAME="cocon_vote_monitor_${VERSION}_${PLATFORM}"
               STAGING_ROOT="$(mktemp -d)"
-              STAGE=$(${STAGING_ROOT}/${BASENAME})
-              mkdir -p "$STAGE/src"
+              STAGE="${STAGING_ROOT}/${BASENAME}"
+              mkdir -p "${STAGE}/src"
 
               # Create env tarball
               micromamba run -n base conda-pack -n app -o env.tar.gz
