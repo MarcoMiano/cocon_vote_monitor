@@ -33,7 +33,7 @@ jobs:
           
           - name: Install conda-pack
             shell: bash -l
-            run: micromambe install -y -n base conda-pack
+            run: micromamba install -y -n base conda-pack
         
           - name: Pack environment
             id: pack
