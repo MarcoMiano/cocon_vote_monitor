@@ -65,7 +65,7 @@ jobs:
               ./env/bin/conda-unpack
               cd src
               # Edit ./src/cocon_vote_monitor/config.py or other files and run.
-              ../app_env/bin/python -m evicorn cocon_vote_monitor.app:app --reload
+              ../app_env/bin/python -m uvicorn cocon_vote_monitor.app:app --reload
               EOF
 
               tar -C "${STAGING_ROOT}" -czf "${BASENAME}.tar.gz" "${BASENAME}"
