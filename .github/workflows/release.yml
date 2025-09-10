@@ -1,0 +1,76 @@
+name: Release
+
+on:
+    push:
+        tags:
+            - 'v*'
+    workflow_dispatch:
+        inputs:
+            version:
+                description: "Version string to use when manually running (e.g., v.1.2.3dev)"
+                required: false
+                default: 'dev'
+
+permissions:
+    contents: write
+
+env:
+    VERSION: ${{ github.event.inputs.version || github.ref.name }}
+
+jobs:
+    release:
+        runs-on: ubuntu-latest
+        steps:
+          - uses: actions/checkout@v4
+          - name: Set up micromamba
+            uses: mamba-org/setup-micromamba@v2
+            with:
+                micromamba-version: '2.3.2-0'
+                cache-environment: true
+                environment-file: environment.yml
+                create-args: >-
+                    -n cocon_vote_monitor
+          
+          - name: Install conda-pack
+            shell: bash -l
+            run: micromambe install -y -n base conda-pack
+        
+          - name: Pack environment
+            id: pack
+            shell: bash -l {0}
+            run: |
+              PATFORM="$(uname -s | tr '[:upper:]' '[:lower:]')-$(uname -m)"
+              STAGE="cocon_vote_monitor${VERSION}_{$PLATFORM}"
+              mkdir -p "$STAGE"
+
+              # Create env tarball
+              conda-pack -n app -o env.tar.gz
+
+              # Stage files
+              mv env.tar.gz "$STAGE/"
+              # include your source tree
+              rsync -a --exclude '.git' --exclude '.github' / "$STAGE/src/" \
+                    --exclude 'env' --exclude '__pycache__' --exclude '*.pyc'
+              
+              # Minimal INSTALL
+              cat > "$STAGE/INSTALL.md" <<'EOF'
+              # Quick start
+              tar -xzf env.tar.gz -C .
+              ./env/bin/conda-unpack
+              cd src
+              # Edit ./src/cocon_vote_monitor/config.py or other files and run.
+              ../app_env/bin/python -m cocon_vote_monitor --help
+              EOF
+
+              TAR="${STAGE}.tar.gz"
+              tar -czf "$TAR" "$STAGE"
+              echo "archive=$TAR" >> "$GITHUB_OUTPUT"
+          
+          - name: Publish release
+            uses: softprops/action-gh-release@v2
+            with:
+                tag_name: ${{ github.ref_name }}
+                name: ${{ github.ref_name }}
+                files: ${{ steps.pack.outputs.archive }}
+            env:
+                GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN}}
