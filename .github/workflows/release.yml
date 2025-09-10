@@ -40,8 +40,10 @@ jobs:
             shell: bash -l {0}
             run: |
               PATFORM="$(uname -s | tr '[:upper:]' '[:lower:]')-$(uname -m)"
-              STAGE="cocon_vote_monitor${VERSION}_{$PLATFORM}"
-              mkdir -p "$STAGE"
+              BASENAME="cocon_vote_monitor_${VERSION}_{$PLATFORM}"
+              STAGING_ROOT="$(mktemp -d)"
+              STAGE=$(${STAGING_ROOT}/${BASENAME})
+              mkdir -p "$STAGE/src"
 
               # Create env tarball
               micromamba run -n base conda-pack -n app -o env.tar.gz
@@ -49,8 +51,10 @@ jobs:
               # Stage files
               mv env.tar.gz "$STAGE/"
               # include your source tree
-              rsync -a --exclude '.git' --exclude '.github' ./ "$STAGE/src/" \
-                    --exclude 'env' --exclude '__pycache__' --exclude '*.pyc'
+              rsync -a --exclude '.git' --exclude '.github' \
+                       --exclude '__pycache__' --exclude '*.pyc' \
+                       --exclude 'env' --exclude '*.tar.gz' \
+                       "$GITHUB_WORKSPACE"/ "$STAGE/src/"
               
               # Minimal INSTALL
               cat > "$STAGE/INSTALL.md" <<'EOF'
@@ -62,9 +66,9 @@ jobs:
               ../app_env/bin/python -m cocon_vote_monitor --help
               EOF
 
-              TAR="${STAGE}.tar.gz"
-              tar -czf "$TAR" "$STAGE"
-              echo "archive=$TAR" >> "$GITHUB_OUTPUT"
+              tar -C "$STAGING_ROOT" -czf "${BASENAME}.tar.gz" "${BASENAME}"
+              mv "${BASENAME}.tar.gz" "GITHUB_WORKSPACE/"
+              echo "archive=${BASENAME}.tar.gz" >> "$GITHUB_OUTPUT"
           
           - name: Publish release
             uses: softprops/action-gh-release@v2
