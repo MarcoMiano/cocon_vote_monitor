@@ -17,14 +17,38 @@ cd cocon_vote_monitor
 
 Create a Python environment using either Conda or a virtual environment.
 
-### Option 1: conda
+### Option 1: Release Package
+> [!NOTE]
+> Packages are only available for 'linux-x86-64'
+
+Download the latest release from [Releases](https://github.com/3P-Technologies/cocon_vote_monitor/releases)
+
+```bash
+# 1. Extract the package and go into the newly created folder
+tar -xzf cocon_vote_monitor_vx.x.x_linux-x86_64.tar.gz
+cd cocon_vote_monitor_vx.x.x_linux-x86_64.tar.gz
+
+# 2. Extract the environment
+mkdir env
+tar -xzf env.tar.gz -C ./env
+
+# 3. Fix the environment pahts
+./env/bin/conda-unpack
+
+# You can now configure the package by editing ./src/cocon_vote_monitor/config.py or other files.
+# 4. Run the app
+cd src
+../env/bin/python -m uvicorn cocon_vote_monitor.app:app --reload
+```
+
+### Option 2: conda
 
 ```bash
 conda env create -f environment.yml
 conda activate cocon_vote_monitor
 ```
 
-### Option 2: virtualenv + pip
+### Option 3: virtualenv + pip
 
 ```bash
 python3 -m venv .venv
@@ -32,7 +56,7 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-### Option 3.1: OFFLINE - conda
+### Option 4.1: OFFLINE - conda
 Conda is not required to be installed in the offline machine.
 
 On a machine with internet access:
@@ -66,7 +90,7 @@ source ~/envs/cocon_vote_monitor/bin/activate
 ```
 
 
-### Option 3.2: OFFLINE - virtualenv + offline pip
+### Option 4.2: OFFLINE - virtualenv + offline pip
 
 On a machine with Internet access:
 
