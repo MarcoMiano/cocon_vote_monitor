@@ -49,7 +49,7 @@ jobs:
               # Stage files
               mv env.tar.gz "$STAGE/"
               # include your source tree
-              rsync -a --exclude '.git' --exclude '.github' / "$STAGE/src/" \
+              rsync -a --exclude '.git' --exclude '.github' ./ "$STAGE/src/" \
                     --exclude 'env' --exclude '__pycache__' --exclude '*.pyc'
               
               # Minimal INSTALL
