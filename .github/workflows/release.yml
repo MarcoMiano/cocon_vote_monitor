@@ -15,7 +15,7 @@ permissions:
     contents: write
 
 env:
-    VERSION: ${{ github.event.inputs.version || github.ref.name }}
+    VERSION: ${{ github.event.inputs.version || github.ref_name }}
 
 jobs:
     release:
