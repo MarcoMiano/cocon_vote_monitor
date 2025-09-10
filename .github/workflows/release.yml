@@ -32,7 +32,7 @@ jobs:
                     -n cocon_vote_monitor
           
           - name: Install conda-pack
-            shell: bash -l
+            shell: bash -l {0}
             run: micromamba install -y -n base conda-pack
         
           - name: Pack environment
